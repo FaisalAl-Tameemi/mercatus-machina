@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <title>Mercatus Machina</title>
+
+  <!-- CSS  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="css/vendor/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+</head>
+<body>
+  <nav class="teal darken-3" role="navigation">
+    <div class="nav-wrapper container">
+      <a id="logo-container" href="#" class="brand-logo">Logo</a>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="#">Get In Touch</a></li>
+      </ul>
+
+      <ul id="nav-mobile" class="side-nav">
+        <li><a href="#">Link 1</a></li>
+      </ul>
+      <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+    </div>
+  </nav>
+  <div class="section no-pad-bot" id="index-banner">
+    <div>
+      <br><br>
+      <h1 class="header center teal-text">Mercatus Machina</h1>
+      <div class="row center">
+        <h5 class="header col s12 light">
+          A stock predictor app built with NodeJS and Python.
+        </h5>
+      </div>
+      <br><br>
+    </div>
+  </div>
+  <hr class="light" />
+  <div class="section" id="index-predictor-demo">
+    <div class="container row">
+      <form class="col m12" id="predict-form">
+        <div class="row">
+          <div class="input-field col s8">
+            <!-- <label>Training Tickers</label> -->
+            <div class="chips chips-initial" id="tickers-train"></div>
+          </div>
+          <div class="input-field col s4">
+            <!-- <label>Training Tickers</label> -->
+            <div class="chips chips-initial" id="tickers-predict"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s4">
+            <input type="date" class="datepicker" name="date_start" id="date-train-start">
+            <label for="date_start">Date Start</label>
+          </div>
+          <div class="input-field col s4">
+            <input type="date" class="datepicker" name="date_test_start" id="date-test-start">
+            <label for="date_test_start">Test Start</label>
+          </div>
+          <div class="input-field col s4">
+            <input type="date" class="datepicker" name="date_end" id="date-end">
+            <label for="date_end">Date End</label>
+          </div>
+        </div>
+        <!-- ACTION BAR -->
+        <div class="right-align">
+          <div style="height: 45px; float: left;" class="hide" id="loader">
+            <div class="preloader-wrapper small active">
+              <div class="spinner-layer spinner-green-only">
+                <div class="circle-clipper left">
+                  <div class="circle"></div>
+                </div><div class="gap-patch">
+                  <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                  <div class="circle"></div>
+                </div>
+              </div>
+            </div>
+            <p style="display: inline-block; padding-left: 25px;">
+              Loading data and building ML models (may take a while)...
+            </p>
+          </div>
+          <button type="submit" class="waves-effect waves-light btn">
+            <i class="material-icons left">done</i>
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <br /><br />
+  <div class="container row" id="results">
+    <div class="col s8">
+      <canvas id="chart" width="100%" height="40"></canvas>
+    </div>
+  </div>
+  <br /><br />
+  <footer class="page-footer teal darken-3">
+    <div class="footer-copyright">
+      <div class="container">
+      Made by <a class="orange-text text-lighten-3" href="http://faisalaltameemi.com">Faisal Al-Tameemi</a>
+      </div>
+    </div>
+  </footer>
+
+
+  <!--  Scripts-->
+  <!-- <script src="js/vendor/lodash.js"></script> -->
+  <script src="js/vendor/jquery.js"></script>
+  <script src="js/vendor/chart.js"></script>
+  <script src="js/vendor/materialize.js"></script>
+  <script src="js/script.js"></script>
+
+  </body>
+</html>

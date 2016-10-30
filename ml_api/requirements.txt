@@ -1,0 +1,11 @@
+flask
+flask-restful
+sqlalchemy
+psycopg2
+sklearn
+pandas
+numpy
+matplotlib
+uuid
+json
+cPickle
