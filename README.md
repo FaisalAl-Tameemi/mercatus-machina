@@ -2,7 +2,7 @@
 
 ## Mercatus Machina
 
-An stock price prediction app built with Python and NodeJS.
+A stock price prediction app built with Python and NodeJS.
 
 __DISCLAIMER:__ This project is build for learning purposes and the author of the code is not responsible for any real financial damages that may occur due to its use. DO NOT use this project as your trusted source for real-life trading transactions.
 
