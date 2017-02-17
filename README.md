@@ -34,7 +34,7 @@ A few steps are however required to get the database up and running:
   - [New Role Documentation](https://www.postgresql.org/docs/9.5/static/sql-createrole.html)
     - Ex: `CREATE USER mercatus_machina WITH PASSWORD 'mercatus_machina';`
   - [Grant Access Documentation](https://www.postgresql.org/docs/9.5/static/sql-grant.html)
-    - Ex: `GRANT ALL PRIVILEGES ON mercatus_machina_dev TO mercatus_machina;`
+    - Ex: `GRANT ALL PRIVILEGES ON database mercatus_machina_dev TO mercatus_machina;`
 
 
 - Import the data dump placed in `./_data/db.sql` into the newly created database
