@@ -1,0 +1,7 @@
+/_data/**/*.csv
+/_trials/*
+
+*.pyc
+/src/trials/*
+
+**/__pycache__

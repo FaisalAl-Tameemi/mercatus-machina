@@ -1,6 +1,6 @@
 import __future__
 from math import floor
-import cPickle
+import pickle as cPickle
 import numpy as np
 import pandas as pd
 from sklearn import neighbors, preprocessing
@@ -12,10 +12,11 @@ import datetime
 from datetime import datetime
 from sklearn.metrics import r2_score, mean_squared_error
 import sys, os, pdb
-import visualizer as vzr
 
 sys.path.append('../')
-from db import engine
+
+import lib.visualizer as vzr
+# from db import engine
 
 
 
@@ -120,6 +121,8 @@ def prepareDataForClassification(dataset, start_test, predict_symbols, horizon, 
     # train labels / outputs
     y = dataset[predict_cols]
 
+    start_test = parser.parse(start_test)
+
     X_train = X[X.index < start_test]
     y_train = y[y.index < start_test]
 
@@ -202,11 +205,11 @@ def performCV(X_train, y_train, number_folds, algo, label):
 
         # folds used to train the model
         X_trainFolds = X[:index]
-        y_trainFolds = y[:index].astype(long)
+        y_trainFolds = y[:index].astype('long')
 
         # fold used to test the model
         X_testFold = X[(index + 1):]
-        y_testFold = y[(index + 1):].astype(long)
+        y_testFold = y[(index + 1):].astype('long')
 
         # fit the model
         model = algo.fit(X_trainFolds, y_trainFolds)
@@ -249,17 +252,23 @@ def getStockDataFromDB(ticker, start_string, end_string):
 
     return df
 
-# uncomment function below when using CSV as a db instead of postgres
-# def getStockDataFromCSV(tickers, start_string, end_string):
-#     datasets = []
-#     # read data path relative to being inside of ml_api folder
-#     data = pd.read_csv('../_data/stocks.csv', encoding='utf-8', header=0)
-#     for t in tickers:
-#         ticker_data = data[data.ticker.str.contains(t)].set_index('date')
-#         ticker_data = ticker_data.loc[(ticker_data.index > start_string) & (ticker_data.index < end_string)]
-#         ticker_data = cleanTickerData(ticker_data, t)
-#         datasets.append(ticker_data)
-#     return datasets
+
+def getStockDataFromCSV(tickers, start_string, end_string):
+    datasets = []
+    # read data path relative to being inside of ml_api folder
+    data = pd.read_csv('_data/sp500_tickers_all.csv', encoding='utf-8', header=0)
+    start_date = parser.parse(start_string)
+    end_date = parser.parse(end_string)
+
+    for t in tickers:
+        ticker_data = data[data.ticker.str.contains(t)].set_index('date')
+        ticker_data.index = pd.to_datetime(ticker_data.index)
+        ticker_data = ticker_data.drop(['ticker'], axis=1)
+        ticker_data = ticker_data.loc[(ticker_data.index > start_date) & (ticker_data.index < end_date)]
+        ticker_data = cleanTickerData(ticker_data, t)
+        datasets.append(ticker_data)
+        print(t, ticker_data.columns) # TODO: remove
+    return datasets
 
 
 def cleanTickerData(df, ticker):
@@ -273,19 +282,25 @@ def cleanTickerData(df, ticker):
 def interpolateData(data):
     data = data.interpolate(method='linear') # linear interpolation
     data = data.fillna(data.mean()) # mean interpolation
-    data = data.fillna(method='ffill').fillna(method='bfill') # front and back fill
-    # print "Count missing: %s"%count_missing(data)
+    data = data.fillna(method='ffill')
+    data = data.fillna(method='bfill') # front and back fill
+    print("Count missing: {}".format(count_missing(data)))
     return data
 
 
 def joinData(data, start, end):
-    data = pd.concat(data, axis=1)#.drop(['date'], axis=1)
+    data = pd.concat(data, axis=1)
+    data.index = pd.to_datetime(data.index).strftime('%d-%m-%Y')
     # generate date range with only business days
     pd_date_range = pd.date_range(start=start, end=end, freq='B')
     pd_date_range = pd_date_range.format(formatter=lambda x: x.strftime('%d-%m-%Y'))
     # merge all data into a single dataframe
     finance = pd.DataFrame(index=pd_date_range)
-    return finance.join(data, how='left')
+    
+    joined = finance.join(data, how='left')
+    joined.index = pd.to_datetime(joined.index)
+
+    return joined
 
 
 def loadMergedData(windows, horizons, train_tickers, predict_tickers, time_start, time_end, files_directory):
@@ -294,8 +309,8 @@ def loadMergedData(windows, horizons, train_tickers, predict_tickers, time_start
     and applies preprocessing steps such as adding new features and interplating.
     """
     data_files = []
-    datasets = [getStockDataFromDB(ticker, time_start, time_end) for ticker in train_tickers]
-    # datasets = getStockDataFromCSV(train_tickers, time_start, time_end)
+    # datasets = [getStockDataFromDB(ticker, time_start, time_end) for ticker in train_tickers]
+    datasets = getStockDataFromCSV(train_tickers, time_start, time_end)
     # plot_columns = ['adj_close_%s'%ticker for ticker in train_tickers]
 
     # Create a prepprocessed file for each of the horizons for the each of the windows specified
@@ -307,8 +322,9 @@ def loadMergedData(windows, horizons, train_tickers, predict_tickers, time_start
             data = [df.copy() for df in datasets]
             # apply rolling mean for window = delta
             data = applyRollMeanDelayedReturns(data, windows=windows_range, symbols=train_tickers)
-            finance = joinData(data, time_start, time_end)
-            finance = interpolateData(finance).sort_index()
+            finance = joinData(data, time_start, time_end).sort_index()
+            
+            finance = interpolateData(finance)
 
             # plot the volatility of the adjusted returns
             # vzr.visualize_volatility(volatility(finance, columns=plot_columns, window=w))
@@ -316,6 +332,7 @@ def loadMergedData(windows, horizons, train_tickers, predict_tickers, time_start
             # Add columns of future days into each row
             # finance = applyLags(finance, horizon_range, predict_tickers)
             finance = applyHorizons(finance, horizon_range, predict_tickers)
+
             # output the data onto a CSV file
             file_path = '{}/finance_w{}_h{}.csv'.format(files_directory, h, w)
             finance.to_csv(file_path, sep=',', encoding='utf-8', header=True)

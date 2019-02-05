@@ -19,6 +19,7 @@ def visualize_predictions(data, title='Actual vs. Predictions'):
     ax.set_title(title)
     ax.set_ylabel('Price in $')
     ax.set_xlabel('Dates')
+    plt.xticks(rotation=45)
     return ax
 
 
