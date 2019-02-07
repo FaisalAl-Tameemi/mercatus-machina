@@ -19,7 +19,7 @@ def visualize_predictions(data, title='Actual vs. Predictions'):
     ax.set_title(title)
     ax.set_ylabel('Price in $')
     ax.set_xlabel('Dates')
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=30)
     return ax
 
 
@@ -29,3 +29,12 @@ def visualize_volatility(data):
     vlt.set_xlabel('Dates')
     vlt.set_title('Stock Volatility')
     return vlt
+
+
+def visualize(data, title):
+    ax = data.plot()
+    # ax.set_title(title)
+    ax.set_ylabel('Price in $')
+    ax.set_xlabel('Dates')
+    plt.xticks(rotation=30)
+    return ax

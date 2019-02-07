@@ -4,4 +4,6 @@
 *.pyc
 /src/trials/*
 
+!/_trials/.keep
+
 **/__pycache__
