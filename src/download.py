@@ -40,6 +40,7 @@ def download_ticker_data(start = datetime.datetime(2016, 1, 1), end = datetime.d
         try:
             symbol_data = quandl.get("WIKI/{}".format(symbol), start_date = start, end_date = end)
             symbol_data.to_csv("_data/tickers/{}.csv".format(symbol))
+            print("Downloaded data for ticker = {}...".format(symbol))
         except:
             print("Failed to get data from SYMBOL = {}".format(symbol))
 
@@ -69,5 +70,8 @@ def merge_all_tickers():
 
 
 if __name__ == "__main__":
-    # download_ticker_data()
+    print("Starting to download S&P500 tickers data...")
+    download_ticker_data()
+    print("Merging data...")
     merge_all_tickers()
+    print("All Done!")

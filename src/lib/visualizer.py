@@ -14,8 +14,8 @@ def visualize_heatmap(ticker, data):
     return mtx
 
 
-def visualize_predictions(data, title='Actual vs. Predictions'):
-    ax = data.plot()
+def visualize_predictions(data, title='Actual vs. Predictions', ax=None):
+    ax = data.plot(ax=ax)
     ax.set_title(title)
     ax.set_ylabel('Price in $')
     ax.set_xlabel('Dates')
@@ -24,16 +24,18 @@ def visualize_predictions(data, title='Actual vs. Predictions'):
 
 
 def visualize_volatility(data):
-    vlt = data.plot(subplots=True, figsize=(6, 6))
-    vlt.set_ylabel('Volatility')
-    vlt.set_xlabel('Dates')
-    vlt.set_title('Stock Volatility')
-    return vlt
+    fig, ax = plt.subplots(figsize=(6,6))
+    fig.subplots_adjust(hspace=0.8, wspace=0.4)
+    data.plot(subplots=True, ax=ax)
+    ax.set_ylabel('Volatility')
+    ax.set_xlabel('Dates')
+    ax.set_title('Stock Volatility')
+    return ax
 
 
-def visualize(data, title):
+def visualize(data, title = ''):
     ax = data.plot()
-    # ax.set_title(title)
+    ax.set_title(title)
     ax.set_ylabel('Price in $')
     ax.set_xlabel('Dates')
     plt.xticks(rotation=30)

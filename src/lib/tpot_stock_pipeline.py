@@ -27,7 +27,7 @@ def predict_tpot(tpot_data):
 
 def get_tpot_pipeline():
     return make_pipeline(
-        StackingEstimator(estimator=KNeighborsRegressor(n_neighbors=40, p=1, weights="uniform")),
+        StackingEstimator(estimator=KNeighborsRegressor(n_neighbors=25, p=1, weights="uniform")),
         PolynomialFeatures(degree=2, include_bias=False, interaction_only=False),
         LassoLarsCV(normalize=True)
     )

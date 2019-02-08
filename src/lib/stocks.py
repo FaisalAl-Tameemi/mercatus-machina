@@ -13,6 +13,7 @@ from datetime import datetime
 from sklearn.metrics import r2_score, mean_squared_error
 import sys, os, pdb
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 sys.path.append('../')
 
@@ -81,8 +82,8 @@ def applyLags(dataset, lags, predict_symbols):
         for l in lags:
             new_col_returns = 'returns_%s_%s'%(symbol,str(l))
             new_col_adj_close = 'adj_close_%s_%s'%(symbol,str(l))
-            dataset[new_col_returns] = dataset['returns_%s'%symbol].shift(l)
-            dataset[new_col_adj_close] = dataset['adj_close_%s'%symbol].shift(l)
+            dataset[new_col_returns] = dataset['returns_%s'%symbol].shift(-1*l)
+            dataset[new_col_adj_close] = dataset['adj_close_%s'%symbol].shift(-1*l)
 
     return dataset.iloc[max(lags):-1,:]
 
@@ -97,8 +98,8 @@ def applyHorizons(dataset, horizons, predict_symbols):
         for h in horizons:
             new_col_returns = 'returns_%s_%s'%(symbol,str(h))
             new_col_adj_close = 'adj_close_%s_%s'%(symbol,str(h))
-            dataset[new_col_returns] = dataset['returns_%s'%symbol].shift(-1*h)
-            dataset[new_col_adj_close] = dataset['adj_close_%s'%symbol].shift(-1*h)
+            dataset[new_col_returns] = dataset['returns_%s'%symbol].shift(h)
+            dataset[new_col_adj_close] = dataset['adj_close_%s'%symbol].shift(h)
 
     # return dataset.iloc[max(horizons):-1,:]
     return dataset[:-max(horizons)]
@@ -188,6 +189,13 @@ def performCV(X_train, y_train, number_folds, model, label, visualize_folds = Fa
     folds = range(2, number_folds + 1)
     accuracies = np.zeros(number_folds-1)
 
+    # create a shared plot for all folds
+    fig, ax = plt.subplots(3, 3, sharey='row')
+
+    fig.set_figheight(11)
+    fig.set_figwidth(9)
+    fig.subplots_adjust(hspace=0.8, wspace=0.4)
+
     # loop from the first 2 folds to the total number of folds
     for i in folds:
         # print "-----"
@@ -228,11 +236,10 @@ def performCV(X_train, y_train, number_folds, model, label, visualize_folds = Fa
         preds_df = pd.DataFrame(predictions, columns=y_testFold.columns, index=y_testFold.index)
         # join and plot
         results = y_testFold.join(preds_df, rsuffix='_pred', lsuffix='_true').sort_index()
-
+        
         if visualize_folds == True:
-            vzr.visualize_predictions(results, title="Predictions on Fold #{}".format(i))
-
-
+            viz = vzr.visualize_predictions(results, ax=ax[int((i - 2)/3)][(i - 2)%3], title="Predictions on Fold #{}".format(i))
+            ax[int((i - 2)/3)][(i - 2)%3].get_legend().remove()
 
     # the function returns the mean of the accuracy on the n-1 folds
     # print 'Accuracy mean: {}'.format(accuracies.mean())
@@ -342,21 +349,20 @@ def loadMergedData(windows, horizons, train_tickers, predict_tickers, time_start
             finance = interpolateData(finance)
 
             # plot the volatility of the adjusted returns
-            # vzr.visualize_volatility(volatility(finance, columns=plot_columns, window=w))
+            print("Volatility Graphs...")
+            vzr.visualize_volatility(volatility(finance, columns=plot_columns, window=w))
 
             # Add columns of future days into each row
-            # finance = applyLags(finance, horizon_range, predict_tickers)
-            finance = applyHorizons(finance, horizon_range, predict_tickers)
+            finance = applyLags(finance, horizon_range, predict_tickers)
+            # finance = applyHorizons(finance, horizon_range, predict_tickers)
             finance = interpolateData(finance)
 
             for c in plot_columns:
                 merged[c] = merged[c].fillna(merged[c].mean()).rolling(window=h).mean()
-            vzr.visualize(merged[plot_columns], title='All Tickers - Rolling Mean ({})'.format(h))
-
-            pdb.set_trace()
+            vzr.visualize(merged[plot_columns], title='All Tickers - Rolling Mean (window={})'.format(h))
 
             vzr.visualize(merged.loc[pd.to_datetime(merged.index) >= parser.parse(test_start)][pred_plot_columns], \
-                            title='Pred Tickers - Test Data - Rolling Mean ({})'.format(h))
+                            title='Pred Tickers - Test Data - Rolling Mean (window={})'.format(h))
 
             # output the data onto a CSV file
             file_path = '{}/finance_w{}_h{}.csv'.format(files_directory, h, w)
